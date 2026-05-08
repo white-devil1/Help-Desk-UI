@@ -20,7 +20,7 @@ export default function TicketRegistration() {
 
   const loadTickets = async () => {
     try {
-      const response = await api.get(`/api/tickets?company_id=${currentUser.company_id}`);
+      const response = await api.get(`/api/tickets/${currentUser.id}`);
       setMyTickets(response.data);
     } catch (err) {
       console.error('Error loading tickets:', err);
@@ -59,31 +59,6 @@ export default function TicketRegistration() {
         <button className="btn-primary-large" onClick={() => setShowForm(true)}>
           <Plus size={20} /> New Request
         </button>
-      </div>
-
-      {/* Stats */}
-      <div className="stats-row">
-        <div className="stat-box">
-          <div className="stat-icon blue"><Ticket size={24} /></div>
-          <div>
-            <p className="stat-label">Total Requests</p>
-            <p className="stat-number">{myTickets.length}</p>
-          </div>
-        </div>
-        <div className="stat-box">
-          <div className="stat-icon orange"><Clock size={24} /></div>
-          <div>
-            <p className="stat-label">Pending</p>
-            <p className="stat-number">{myTickets.filter(t => t.status === 'open').length}</p>
-          </div>
-        </div>
-        <div className="stat-box">
-          <div className="stat-icon green"><CheckCircle size={24} /></div>
-          <div>
-            <p className="stat-label">Resolved</p>
-            <p className="stat-number">{myTickets.filter(t => t.status === 'resolved').length}</p>
-          </div>
-        </div>
       </div>
 
       {/* Tickets List */}
@@ -142,6 +117,7 @@ export default function TicketRegistration() {
                   <option value="asset_repair">Asset Repair</option>
                   <option value="asset_replacement">Asset Replacement</option>
                   <option value="asset_upgrade">Asset Upgrade</option>
+                  <option value="other">Other</option>
                 </select>
               </div>
               <div className="form-group">
@@ -168,15 +144,6 @@ export default function TicketRegistration() {
               <div className="modal-actions">
                 <button type="button" className="btn-cancel" onClick={() => setShowForm(false)}>Cancel</button>
                 <button type="submit" className="btn-submit">Submit Request</button>
-              </div>
-              // Inside TicketRegistration.jsx, right after the header:
-              <div className="flex justify-end mb-4">
-                <button 
-                    className="btn-outline-primary"
-                    onClick={() => window.location.href = '/tickets/all'}
-  >
-                    📊 View All Tickets (Admin)
-                </button>
               </div>
             </form>
           </div>

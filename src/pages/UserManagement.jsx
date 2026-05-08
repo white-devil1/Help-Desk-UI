@@ -200,8 +200,8 @@ export default function UserManagement() {
         <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
           <div className="add-user-modal" onClick={e => e.stopPropagation()}>
             {/* Modal Header */}
-            <div className="modal-header-purple">
-              <div className="header-icon-purple">
+            <div className="modal-header-green">
+              <div className="header-icon-green">
                 <UserPlus size={24} />
               </div>
               <div>
@@ -314,7 +314,7 @@ export default function UserManagement() {
                 >
                   Cancel
                 </button>
-                <button type="submit" className="btn-primary-purple">
+                <button type="submit" className="btn-primary-green">
                   <UserPlus size={18} />
                   Create User
                 </button>

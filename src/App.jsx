@@ -153,12 +153,10 @@
 
 
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import Assets from './pages/Assets';
 import TicketRegistration from './pages/TicketRegistration'; // Original
+import Dashboard from './pages/Dashboard';
 import TicketList from './pages/TicketList'; // New Admin Page
 import AIChat from './pages/AIChat';
-import UserManagement from './pages/UserManagement';
-import Attendance from './pages/Attendance';
 import './App.css';
 
 function App() {
@@ -169,26 +167,23 @@ function App() {
           {/* Link to ORIGINAL employee page */}
           <Link to="/" className="nav-link">🎫 My Requests</Link>
           
-          {/* Link to NEW admin page */}
-          <Link to="/tickets/all" className="nav-link">📊 All Tickets</Link>
+          <Link to="/dashboard" className="nav-link">📊 Dashboard</Link>
+
+          <Link to="/tickets/all" className="nav-link">📋 All Tickets</Link>
           
-          <Link to="/assets" className="nav-link">📦 Assets</Link>
           <Link to="/chat" className="nav-link">🤖 AI Chat</Link>
-          <Link to="/users" className="nav-link">👥 User Management</Link>
-          <Link to="/attendance" className="nav-link">⏰ Attendance</Link>
         </nav>
 
         <Routes>
           {/* Original Employee Page */}
           <Route path="/" element={<TicketRegistration />} />
           
+          <Route path="/dashboard" element={<Dashboard />} />
+
           {/* NEW Admin Page - Separate Route */}
           <Route path="/tickets/all" element={<TicketList />} />
           
-          <Route path="/assets" element={<Assets />} />
           <Route path="/chat" element={<AIChat />} />
-          <Route path="/users" element={<UserManagement />} />
-          <Route path="/attendance" element={<Attendance />} />
         </Routes>
       </div>
     </Router>

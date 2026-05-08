@@ -299,6 +299,7 @@ export default function TicketList() {
   // Filter State
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [filterPriority, setFilterPriority] = useState('all');
 
   useEffect(() => {
     loadTickets();
@@ -306,11 +307,11 @@ export default function TicketList() {
 
   useEffect(() => {
     applyFilters();
-  }, [searchTerm, filterStatus, tickets]);
+  }, [searchTerm, filterStatus, filterPriority, tickets]);
 
   const loadTickets = async () => {
     try {
-      const response = await api.get('/api/tickets?company_id=1');
+      const response = await api.get('/api/tickets/all');
       setTickets(response.data);
     } catch (err) {
       console.error('Error loading tickets:', err);
@@ -333,6 +334,13 @@ export default function TicketList() {
     if (filterStatus !== 'all') {
       filtered = filtered.filter(ticket => ticket.status === filterStatus);
     }
+
+    if (filterPriority !== 'all') {
+      filtered = filtered.filter(ticket => ticket.priority === filterPriority);
+    }
+
+    // Sort tickets so the newest are displayed first (descending order)
+    filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
     setFilteredTickets(filtered);
   };
@@ -357,26 +365,43 @@ export default function TicketList() {
       </div>
 
       {/* Filters */}
-      <div className="filters-section">
-        <div className="search-box">
-          <Search size={20} />
+      <div className="filters-section" style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap', padding: '10px 0' }}>
+        <div className="search-box" style={{ width: '240px', height: '36px', minHeight: '36px', padding: '0 12px', margin: 0 }}>
+          <Search size={16} />
           <input
             type="text"
-            placeholder="Search by ticket number or title..."
+            placeholder="Search tickets..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            style={{ fontSize: '14px' }}
           />
         </div>
-        <select 
-          value={filterStatus} 
-          onChange={(e) => setFilterStatus(e.target.value)}
-          className="filter-select"
-        >
-          <option value="all">All Status</option>
-          <option value="open">Open</option>
-          <option value="resolved">Resolved</option>
-          <option value="closed">Closed</option>
-        </select>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          <select 
+            value={filterStatus} 
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className="filter-select"
+            style={{ width: 'auto', minWidth: '160px', margin: 0 }}
+          >
+            <option value="all">All Status</option>
+            <option value="open">Open</option>
+            <option value="pending">Pending</option>
+            <option value="in_progress">In Progress</option>
+            <option value="resolved">Resolved</option>
+            <option value="closed">Closed</option>
+          </select>
+          <select 
+            value={filterPriority} 
+            onChange={(e) => setFilterPriority(e.target.value)}
+            className="filter-select"
+            style={{ width: 'auto', minWidth: '160px', margin: 0 }}
+          >
+            <option value="all">All Priority</option>
+            <option value="urgent">Urgent</option>
+            <option value="high">High</option>
+            <option value="normal">Normal</option>
+          </select>
+        </div>
       </div>
 
       {/* Table */}
@@ -436,34 +461,51 @@ export default function TicketList() {
               </button>
             </div>
             
-            <div className="modal-body">
-              <div className="ticket-detail-grid">
-                <div className="detail-item">
-                  <label>Ticket Number</label>
-                  <p>{selectedTicket.ticket_number}</p>
+            <div className="modal-body" style={{ padding: '24px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', background: '#f8fafc', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', marginBottom: '24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontWeight: '600', color: '#64748b', fontSize: '14px' }}>Ticket Number</span>
+                  <span style={{ fontWeight: '600', color: '#0f172a', fontSize: '15px' }}>{selectedTicket.ticket_number}</span>
                 </div>
-                <div className="detail-item">
-                  <label>Status</label>
+                
+                <div style={{ height: '1px', background: '#e2e8f0', width: '100%' }}></div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontWeight: '600', color: '#64748b', fontSize: '14px' }}>Status</span>
                   <span className={`status-badge ${selectedTicket.status}`}>{selectedTicket.status}</span>
                 </div>
-                <div className="detail-item">
-                  <label>Priority</label>
+
+                <div style={{ height: '1px', background: '#e2e8f0', width: '100%' }}></div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontWeight: '600', color: '#64748b', fontSize: '14px' }}>Priority</span>
                   <span className={`priority-badge ${selectedTicket.priority}`}>{selectedTicket.priority}</span>
                 </div>
-                <div className="detail-item">
-                  <label>Created Date</label>
-                  <p>{new Date(selectedTicket.created_at).toLocaleString()}</p>
+
+                <div style={{ height: '1px', background: '#e2e8f0', width: '100%' }}></div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontWeight: '600', color: '#64748b', fontSize: '14px' }}>Created Date & Time</span>
+                  <span style={{ fontWeight: '500', color: '#334155', fontSize: '14px' }}>{new Date(selectedTicket.created_at).toLocaleString()}</span>
                 </div>
               </div>
 
-              <div className="detail-section">
-                <h3>Description</h3>
-                <p>{selectedTicket.description}</p>
+              <div className="detail-section" style={{ background: '#ffffff', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                <h3 style={{ margin: '0 0 12px 0', fontSize: '16px', color: '#0f172a' }}>Description of the Problem</h3>
+                <ul style={{ margin: 0, paddingLeft: '20px', color: '#475569', lineHeight: '1.7', fontSize: '15px' }}>
+                  {selectedTicket.description ? (
+                    selectedTicket.description.replace(/\*\*/g, '').split('\n').filter(line => line.trim() !== '').map((line, index) => (
+                      <li key={index} style={{ marginBottom: '6px' }}>{line}</li>
+                    ))
+                  ) : (
+                    <li>No description provided.</li>
+                  )}
+                </ul>
               </div>
             </div>
 
-            <div className="modal-footer">
-              <button className="btn-secondary" onClick={() => setShowModal(false)}>Close</button>
+            <div className="modal-footer" style={{ borderTop: '1px solid #e2e8f0', padding: '16px 24px', display: 'flex', justifyContent: 'flex-end', background: '#f8fafc', borderBottomLeftRadius: '12px', borderBottomRightRadius: '12px' }}>
+              <button className="btn-secondary" onClick={() => setShowModal(false)} style={{ padding: '8px 16px', borderRadius: '8px', cursor: 'pointer' }}>Close</button>
             </div>
           </div>
         </div>
