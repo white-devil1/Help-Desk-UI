@@ -6,6 +6,7 @@ import '../App.css';
 export default function TicketRegistration() {
   const [myTickets, setMyTickets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [currentUser] = useState({ id: 1, company_id: 1 });
   const [formData, setFormData] = useState({
@@ -30,18 +31,28 @@ export default function TicketRegistration() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
-      await api.post('/api/tickets', {
-        ...formData,
-        company_id: currentUser.company_id,
-        requested_by: currentUser.id,
+      const response = await api.post('/api/tickets', {
+        title: formData.title,
+        description: formData.description,
+        category: formData.ticket_type,
+        priority: formData.priority,
+        user_id: currentUser.id,
       });
-      alert('✅ Ticket created successfully!');
+      
+      const newTicketId = response.data.ticket_id;
+      const ticketNum = `TCK-${String(newTicketId).padStart(4, '0')}`;
+      
+      alert(`✅ Ticket ${ticketNum} created successfully!`);
       setShowForm(false);
       setFormData({ title: '', description: '', ticket_type: 'general', priority: 'normal' });
       loadTickets();
     } catch (err) {
-      alert('❌ Failed to create ticket: ' + err.message);
+      console.error('Submission error:', err);
+      alert('❌ Failed to create ticket: ' + (err.response?.data?.detail || err.message));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -51,7 +62,6 @@ export default function TicketRegistration() {
 
   return (
     <div className="page">
-      {/* Page header */}
       <div className="page-header">
         <div className="page-title">
           <div className="page-title-icon">
@@ -67,7 +77,6 @@ export default function TicketRegistration() {
         </button>
       </div>
 
-      {/* Tickets section */}
       <div className="card">
         <div className="card-header">
           <span className="card-title">
@@ -104,18 +113,18 @@ export default function TicketRegistration() {
         </div>
       </div>
 
-      {/* New Request Modal */}
       {showForm && (
-        <div className="modal-overlay" onClick={() => setShowForm(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-overlay" onMouseDown={() => setShowForm(false)}>
+          <div className="modal" onMouseDown={e => e.stopPropagation()} onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Create New Request</h2>
               <button className="btn-close" onClick={() => setShowForm(false)}>
                 <X size={18} />
               </button>
             </div>
-            <div className="modal-body">
-              <form onSubmit={handleSubmit} id="new-request-form" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            
+            <form onSubmit={handleSubmit}>
+              <div className="modal-body">
                 <div className="form-group">
                   <label className="form-label">Title *</label>
                   <input
@@ -164,12 +173,26 @@ export default function TicketRegistration() {
                     placeholder="Describe your issue in detail…"
                   />
                 </div>
-              </form>
-            </div>
-            <div className="modal-footer">
-              <button type="button" className="btn-secondary" onClick={() => setShowForm(false)}>Cancel</button>
-              <button type="submit" form="new-request-form" className="btn-primary">Submit Request</button>
-            </div>
+              </div>
+              
+              <div className="modal-footer">
+                <button 
+                  type="button" 
+                  className="btn-secondary" 
+                  onClick={() => setShowForm(false)}
+                  disabled={isSubmitting}
+                >
+                  CANCEL
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn-primary" 
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'GENERATING...' : 'SUBMIT REQUEST'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
