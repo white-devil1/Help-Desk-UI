@@ -152,7 +152,7 @@
 
 
 
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, NavLink } from 'react-router-dom';
 import TicketRegistration from './pages/TicketRegistration'; // Original
 import Dashboard from './pages/Dashboard';
 import TicketList from './pages/TicketList'; // New Admin Page
@@ -164,27 +164,38 @@ function App() {
     <Router>
       <div className="app">
         <nav className="main-nav">
-          {/* Link to ORIGINAL employee page */}
-          <Link to="/" className="nav-link">🎫 My Requests</Link>
+          <div className="sidebar-header">
+            <div className="logo-icon-small">🛡️</div>
+            <h2>NIRA CRM</h2>
+          </div>
           
-          <Link to="/dashboard" className="nav-link">📊 Dashboard</Link>
+          <div className="nav-links">
+            <NavLink to="/" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
+              <span className="icon">📊</span> Dashboard
+            </NavLink>
 
-          <Link to="/tickets/all" className="nav-link">📋 All Tickets</Link>
-          
-          <Link to="/chat" className="nav-link">🤖 AI Chat</Link>
+            <NavLink to="/requests" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
+              <span className="icon">🎫</span> My Requests
+            </NavLink>
+
+            <NavLink to="/tickets/all" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
+              <span className="icon">📋</span> All Tickets
+            </NavLink>
+            
+            <NavLink to="/chat" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
+              <span className="icon">🤖</span> AI Chat
+            </NavLink>
+          </div>
         </nav>
 
-        <Routes>
-          {/* Original Employee Page */}
-          <Route path="/" element={<TicketRegistration />} />
-          
-          <Route path="/dashboard" element={<Dashboard />} />
-
-          {/* NEW Admin Page - Separate Route */}
-          <Route path="/tickets/all" element={<TicketList />} />
-          
-          <Route path="/chat" element={<AIChat />} />
-        </Routes>
+        <main className="main-content">
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/requests" element={<TicketRegistration />} />
+            <Route path="/tickets/all" element={<TicketList />} />
+            <Route path="/chat" element={<AIChat />} />
+          </Routes>
+        </main>
       </div>
     </Router>
   );

@@ -34,8 +34,7 @@ export default function TicketRegistration() {
     try {
       await api.post('/api/tickets', {
         ...formData,
-        company_id: currentUser.company_id,
-        requested_by: currentUser.id,
+        user_id: currentUser.id,
       });
       alert('✅ Ticket created successfully!');
       setShowForm(false);
