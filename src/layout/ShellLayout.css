@@ -1,0 +1,48 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--bg-canvas);
+}
+
+.shell-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.shell-main {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--bg-canvas);
+}
+
+/* ── Mobile bottom nav ─────────────────────────── */
+.mobile-nav {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0;
+  height: var(--mobile-nav-height, 64px);
+  background: var(--bg-chrome, #0f1419);
+  border-top: 1px solid rgba(255,255,255,.07);
+  z-index: 499;
+  align-items: center; justify-content: space-around;
+  padding: 0 4px;
+}
+.mob-nav-item {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; flex: 1; min-height: var(--mobile-nav-height, 64px);
+  color: rgba(255,255,255,.45); text-decoration: none;
+  font: 600 10px var(--font-sans, sans-serif); letter-spacing: 0.04em;
+  background: transparent; border: none; cursor: pointer;
+  transition: color 120ms;
+}
+.mob-nav-item:hover,
+.mob-nav-item--active { color: var(--accent, #22c55e); }
+
+@media (max-width: 767px) {
+  .mobile-nav { display: flex; }
+  .shell-main { padding-bottom: var(--mobile-nav-height, 64px); }
+}

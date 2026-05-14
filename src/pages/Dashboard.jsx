@@ -1,15 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Ticket, CheckCircle, Clock } from 'lucide-react';
 import api from '../utils/api';
+import '../App.css';
 
 export default function Dashboard() {
   const [myTickets, setMyTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentUser] = useState({ id: 1, company_id: 1 });
 
-  useEffect(() => {
-    loadTickets();
-  }, []);
+  useEffect(() => { loadTickets(); }, []);
 
   const loadTickets = async () => {
     try {
@@ -22,38 +21,59 @@ export default function Dashboard() {
     }
   };
 
-  if (loading) return <div className="loading">Loading dashboard...</div>;
+  if (loading) return <div className="page-loading"><span>Loading dashboard…</span></div>;
+
+  const total    = myTickets.length;
+  const pending  = myTickets.filter(t => t.status === 'open').length;
+  const resolved = myTickets.filter(t => t.status === 'resolved').length;
 
   return (
-    <div className="ticket-registration-page">
-      <div className="page-header-beautiful">
-        <div className="header-content">
-          <h1>📊 My Dashboard</h1>
-          <p>Overview of your support requests</p>
+    <div className="page">
+      {/* Page header */}
+      <div className="page-header">
+        <div className="page-title">
+          <div className="page-title-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+              <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+            </svg>
+          </div>
+          <div>
+            <h1>Dashboard</h1>
+            <p className="page-subtitle">Overview of your support requests</p>
+          </div>
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="stats-row" style={{ marginTop: '20px' }}>
-        <div className="stat-box">
-          <div className="stat-icon blue"><Ticket size={24} /></div>
-          <div>
-            <p className="stat-label">Total Requests</p>
-            <p className="stat-number">{myTickets.length}</p>
+      {/* Stat cards */}
+      <div className="stats-grid">
+        <div className="stat-card">
+          <div className="stat-icon-wrap si-blue">
+            <Ticket size={20} />
+          </div>
+          <div className="stat-body">
+            <span className="stat-value">{total}</span>
+            <span className="stat-label">Total Requests</span>
           </div>
         </div>
-        <div className="stat-box">
-          <div className="stat-icon orange"><Clock size={24} /></div>
-          <div>
-            <p className="stat-label">Pending</p>
-            <p className="stat-number">{myTickets.filter(t => t.status === 'open').length}</p>
+
+        <div className="stat-card">
+          <div className="stat-icon-wrap si-amber">
+            <Clock size={20} />
+          </div>
+          <div className="stat-body">
+            <span className="stat-value">{pending}</span>
+            <span className="stat-label">Pending</span>
           </div>
         </div>
-        <div className="stat-box">
-          <div className="stat-icon green"><CheckCircle size={24} /></div>
-          <div>
-            <p className="stat-label">Resolved</p>
-            <p className="stat-number">{myTickets.filter(t => t.status === 'resolved').length}</p>
+
+        <div className="stat-card">
+          <div className="stat-icon-wrap si-green">
+            <CheckCircle size={20} />
+          </div>
+          <div className="stat-body">
+            <span className="stat-value">{resolved}</span>
+            <span className="stat-label">Resolved</span>
           </div>
         </div>
       </div>

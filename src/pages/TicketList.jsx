@@ -1,313 +1,21 @@
-// import { useState, useEffect } from 'react';
-// import { 
-//   Ticket, Search, X, ChevronLeft, ChevronRight, 
-//   Eye, Calendar, Clock, AlertCircle, CheckCircle, Filter 
-// } from 'lucide-react';
-// import api from '../utils/api';
-
-// export default function TicketList() {
-//   const [tickets, setTickets] = useState([]);
-//   const [filteredTickets, setFilteredTickets] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [selectedTicket, setSelectedTicket] = useState(null);
-//   const [showModal, setShowModal] = useState(false);
-  
-//   // Search & Filter State
-//   const [searchTerm, setSearchTerm] = useState('');
-//   const [filterStatus, setFilterStatus] = useState('all');
-//   const [filterPriority, setFilterPriority] = useState('all');
-//   const [filterType, setFilterType] = useState('all');
-  
-//   // Pagination State
-//   const [currentPage, setCurrentPage] = useState(1);
-//   const [ticketsPerPage] = useState(8);
-
-//   useEffect(() => {
-//     loadTickets();
-//   }, []);
-
-//   useEffect(() => {
-//     applyFilters();
-//   }, [searchTerm, filterStatus, filterPriority, filterType, tickets]);
-
-//   const loadTickets = async () => {
-//     try {
-//       // Fetch all tickets
-//       const response = await api.get('/api/tickets?company_id=1');
-//       setTickets(response.data);
-//     } catch (err) {
-//       console.error('Error loading tickets:', err);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   const applyFilters = () => {
-//     let filtered = [...tickets];
-
-//     if (searchTerm) {
-//       const term = searchTerm.toLowerCase();
-//       filtered = filtered.filter(ticket =>
-//         ticket.ticket_number?.toLowerCase().includes(term) ||
-//         ticket.title?.toLowerCase().includes(term) ||
-//         ticket.description?.toLowerCase().includes(term)
-//       );
-//     }
-
-//     if (filterStatus !== 'all') filtered = filtered.filter(t => t.status === filterStatus);
-//     if (filterPriority !== 'all') filtered = filtered.filter(t => t.priority === filterPriority);
-//     if (filterType !== 'all') filtered = filtered.filter(t => t.ticket_type === filterType);
-
-//     setFilteredTickets(filtered);
-//     setCurrentPage(1);
-//   };
-
-//   const clearFilters = () => {
-//     setSearchTerm('');
-//     setFilterStatus('all');
-//     setFilterPriority('all');
-//     setFilterType('all');
-//   };
-
-//   // Pagination Logic
-//   const indexOfLastTicket = currentPage * ticketsPerPage;
-//   const indexOfFirstTicket = indexOfLastTicket - ticketsPerPage;
-//   const currentTickets = filteredTickets.slice(indexOfFirstTicket, indexOfLastTicket);
-//   const totalPages = Math.ceil(filteredTickets.length / ticketsPerPage);
-
-//   const viewTicketDetails = (ticket) => {
-//     setSelectedTicket(ticket);
-//     setShowModal(true);
-//   };
-
-//   if (loading) return <div className="loading">Loading tickets...</div>;
-
-//   return (
-//     <div className="ticket-list-page">
-//       {/* 🟣 MODERN HEADER */}
-//       <div className="modern-header">
-//         <div className="header-left">
-//           <div className="logo-icon"><Ticket size={32} /></div>
-//           <div>
-//             <h1>All Tickets</h1>
-//             <p>View and manage all support tickets</p>
-//           </div>
-//         </div>
-//         <div className="header-stats-badge">
-//            <span>Total: {filteredTickets.length}</span>
-//         </div>
-//       </div>
-
-//       {/* 📊 STAT CARDS */}
-//       <div className="modern-stats-grid">
-//         <div className="stat-card-modern info">
-//           <div className="stat-icon-wrapper"><Ticket size={28} /></div>
-//           <div>
-//             <p className="stat-label">Total Tickets</p>
-//             <h3 className="stat-value">{filteredTickets.length}</h3>
-//           </div>
-//         </div>
-//         <div className="stat-card-modern warning">
-//           <div className="stat-icon-wrapper"><Clock size={28} /></div>
-//           <div>
-//             <p className="stat-label">Pending</p>
-//             <h3 className="stat-value">{filteredTickets.filter(t => t.status === 'open').length}</h3>
-//           </div>
-//         </div>
-//         <div className="stat-card-modern success">
-//           <div className="stat-icon-wrapper"><CheckCircle size={28} /></div>
-//           <div>
-//             <p className="stat-label">Resolved</p>
-//             <h3 className="stat-value">{filteredTickets.filter(t => t.status === 'resolved').length}</h3>
-//           </div>
-//         </div>
-//         <div className="stat-card-modern primary">
-//           <div className="stat-icon-wrapper"><AlertCircle size={28} /></div>
-//           <div>
-//             <p className="stat-label">Urgent</p>
-//             <h3 className="stat-value">{filteredTickets.filter(t => t.priority === 'urgent').length}</h3>
-//           </div>
-//         </div>
-//       </div>
-
-//       {/* 🔍 SEARCH & FILTERS */}
-//       <div className="filters-section">
-//         <div className="search-box">
-//           <Search size={20} />
-//           <input
-//             type="text"
-//             placeholder="Search by ticket number, title, or description..."
-//             value={searchTerm}
-//             onChange={(e) => setSearchTerm(e.target.value)}
-//           />
-//         </div>
-
-//         <div className="filters-grid">
-//           <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="filter-select">
-//             <option value="all">All Status</option>
-//             <option value="open">Open</option>
-//             <option value="in_progress">In Progress</option>
-//             <option value="resolved">Resolved</option>
-//             <option value="closed">Closed</option>
-//           </select>
-
-//           <select value={filterPriority} onChange={(e) => setFilterPriority(e.target.value)} className="filter-select">
-//             <option value="all">All Priority</option>
-//             <option value="low">Low</option>
-//             <option value="normal">Normal</option>
-//             <option value="high">High</option>
-//             <option value="urgent">Urgent</option>
-//           </select>
-
-//           <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="filter-select">
-//             <option value="all">All Types</option>
-//             <option value="general">General IT</option>
-//             <option value="asset">Asset Issue</option>
-//             <option value="user_management">User Management</option>
-//             <option value="attendance">Attendance</option>
-//           </select>
-
-//           <button className="btn-clear-filters" onClick={clearFilters}>
-//             <X size={16} /> Clear
-//           </button>
-//         </div>
-//       </div>
-
-//       {/* 📋 TABLE */}
-//       <div className="tickets-table-container">
-//         <table className="tickets-table">
-//           <thead>
-//             <tr>
-//               <th>Ticket #</th>
-//               <th>Title</th>
-//               <th>Type</th>
-//               <th>Status</th>
-//               <th>Priority</th>
-//               <th>Requested By</th>
-//               <th>Created</th>
-//               <th>Actions</th>
-//             </tr>
-//           </thead>
-//           <tbody>
-//             {currentTickets.length === 0 ? (
-//               <tr>
-//                 <td colSpan="8" className="no-results">
-//                   <Ticket size={48} />
-//                   <p>No tickets found matching your filters</p>
-//                 </td>
-//               </tr>
-//             ) : (
-//               currentTickets.map(ticket => (
-//                 <tr key={ticket.id}>
-//                   <td className="ticket-number">{ticket.ticket_number}</td>
-//                   <td className="ticket-title">{ticket.title}</td>
-//                   <td><span className="type-badge">{ticket.ticket_type}</span></td>
-//                   <td>
-//                     <span className={`status-badge ${ticket.status}`}>
-//                       {ticket.status}
-//                     </span>
-//                   </td>
-//                   <td>
-//                     <span className={`priority-badge ${ticket.priority}`}>
-//                       {ticket.priority}
-//                     </span>
-//                   </td>
-//                   <td>User #{ticket.requested_by}</td>
-//                   <td>{new Date(ticket.created_at).toLocaleDateString()}</td>
-//                   <td>
-//                     <button className="btn-view" onClick={() => viewTicketDetails(ticket)}>
-//                       <Eye size={16} /> View
-//                     </button>
-//                   </td>
-//                 </tr>
-//               ))
-//             )}
-//           </tbody>
-//         </table>
-//       </div>
-
-//       {/* 📄 PAGINATION */}
-//       {totalPages > 1 && (
-//         <div className="pagination">
-//           <button className="page-btn" onClick={() => setCurrentPage(p => Math.max(p - 1, 1))} disabled={currentPage === 1}>
-//             <ChevronLeft size={20} /> Prev
-//           </button>
-          
-//           <div className="page-numbers">
-//             {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-//               <button key={page} className={`page-number ${currentPage === page ? 'active' : ''}`} onClick={() => setCurrentPage(page)}>
-//                 {page}
-//               </button>
-//             ))}
-//           </div>
-
-//           <button className="page-btn" onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages}>
-//             Next <ChevronRight size={20} />
-//           </button>
-//         </div>
-//       )}
-
-//       {/* 🔍 DETAIL MODAL */}
-//       {showModal && selectedTicket && (
-//         <div className="modal-overlay" onClick={() => setShowModal(false)}>
-//           <div className="modal-content" onClick={e => e.stopPropagation()}>
-//             <div className="modal-header">
-//               <h2>{selectedTicket.title}</h2>
-//               <button className="btn-close" onClick={() => setShowModal(false)}><X size={24} /></button>
-//             </div>
-//             <div className="modal-body">
-//               <div className="ticket-info-grid">
-//                 <div className="info-item"><label>Ticket Number</label><p>{selectedTicket.ticket_number}</p></div>
-//                 <div className="info-item"><label>Status</label><span className={`status-badge ${selectedTicket.status}`}>{selectedTicket.status}</span></div>
-//                 <div className="info-item"><label>Priority</label><span className={`priority-badge ${selectedTicket.priority}`}>{selectedTicket.priority}</span></div>
-//                 <div className="info-item"><label>Type</label><p>{selectedTicket.ticket_type}</p></div>
-//                 <div className="info-item"><label>Requested By</label><p>User #{selectedTicket.requested_by}</p></div>
-//                 <div className="info-item"><label>Created</label><p>{new Date(selectedTicket.created_at).toLocaleString()}</p></div>
-//               </div>
-//               <div className="description-section">
-//                 <h3>Description</h3>
-//                 <p>{selectedTicket.description}</p>
-//               </div>
-//             </div>
-//             <div className="modal-footer">
-//               <button className="btn-secondary" onClick={() => setShowModal(false)}>Close</button>
-//             </div>
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// }/
-
-
 import { useState, useEffect } from 'react';
-import { 
-  Ticket, Search, X, ChevronLeft, ChevronRight, 
-  Eye, CheckCircle, Clock, AlertCircle 
-} from 'lucide-react';
+import { Ticket, Search, X, Eye } from 'lucide-react';
 import api from '../utils/api';
+import '../App.css';
 
 export default function TicketList() {
-  const [tickets, setTickets] = useState([]);
+  const [tickets, setTickets]               = useState([]);
   const [filteredTickets, setFilteredTickets] = useState([]);
-  const [loading, setLoading] = useState(true);
-  
-  // Modal State
-  const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading]               = useState(true);
+  const [showModal, setShowModal]           = useState(false);
   const [selectedTicket, setSelectedTicket] = useState(null);
-
-  // Filter State
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
+  const [searchTerm, setSearchTerm]         = useState('');
+  const [filterStatus, setFilterStatus]     = useState('all');
   const [filterPriority, setFilterPriority] = useState('all');
 
-  useEffect(() => {
-    loadTickets();
-  }, []);
+  useEffect(() => { loadTickets(); }, []);
 
-  useEffect(() => {
-    applyFilters();
-  }, [searchTerm, filterStatus, filterPriority, tickets]);
+  useEffect(() => { applyFilters(); }, [searchTerm, filterStatus, filterPriority, tickets]);
 
   const loadTickets = async () => {
     try {
@@ -322,91 +30,87 @@ export default function TicketList() {
 
   const applyFilters = () => {
     let filtered = [...tickets];
-
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(ticket =>
-        ticket.ticket_number?.toLowerCase().includes(term) ||
-        ticket.title?.toLowerCase().includes(term)
+      filtered = filtered.filter(t =>
+        t.ticket_number?.toLowerCase().includes(term) ||
+        t.title?.toLowerCase().includes(term)
       );
     }
-
-    if (filterStatus !== 'all') {
-      filtered = filtered.filter(ticket => ticket.status === filterStatus);
-    }
-
-    if (filterPriority !== 'all') {
-      filtered = filtered.filter(ticket => ticket.priority === filterPriority);
-    }
-
-    // Sort tickets so the newest are displayed first (descending order)
+    if (filterStatus !== 'all')   filtered = filtered.filter(t => t.status === filterStatus);
+    if (filterPriority !== 'all') filtered = filtered.filter(t => t.priority === filterPriority);
     filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
     setFilteredTickets(filtered);
   };
 
-  // ✅ THIS FUNCTION OPENS THE POPUP
   const handleViewTicket = (ticket) => {
     setSelectedTicket(ticket);
     setShowModal(true);
   };
 
-  if (loading) return <div className="loading">Loading tickets...</div>;
+  const statusBadge   = (s) => `badge badge-${s}`;
+  const priorityBadge = (p) => `badge badge-${p}`;
+
+  if (loading) return <div className="page-loading"><span>Loading tickets…</span></div>;
 
   return (
-    <div className="ticket-list-page">
-      {/* Header */}
+    <div className="page">
+      {/* Page header */}
       <div className="page-header">
-        <h1><Ticket size={32} /> All Tickets</h1>
-        <div className="header-stats">
-          <span className="stat-badge">Total: {filteredTickets.length}</span>
-          <span className="stat-badge open">Open: {filteredTickets.filter(t => t.status === 'open').length}</span>
+        <div className="page-title">
+          <div className="page-title-icon">
+            <Ticket size={20} />
+          </div>
+          <div>
+            <h1>All Tickets</h1>
+            <p className="page-subtitle">{filteredTickets.length} tickets · {filteredTickets.filter(t => t.status === 'open').length} open</p>
+          </div>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="filters-section" style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap', padding: '10px 0' }}>
-        <div className="search-box" style={{ width: '240px', height: '36px', minHeight: '36px', padding: '0 12px', margin: 0 }}>
-          <Search size={16} />
+      {/* Toolbar */}
+      <div className="toolbar">
+        <div className="search-wrap">
+          <Search size={14} />
           <input
             type="text"
-            placeholder="Search tickets..."
+            placeholder="Search tickets…"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ fontSize: '14px' }}
+            onChange={e => setSearchTerm(e.target.value)}
           />
+          {searchTerm && (
+            <button onClick={() => setSearchTerm('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', padding: 0 }}>
+              <X size={14} />
+            </button>
+          )}
         </div>
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          <select 
-            value={filterStatus} 
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="filter-select"
-            style={{ width: 'auto', minWidth: '160px', margin: 0 }}
-          >
-            <option value="all">All Status</option>
-            <option value="open">Open</option>
-            <option value="pending">Pending</option>
-            <option value="in_progress">In Progress</option>
-            <option value="resolved">Resolved</option>
-            <option value="closed">Closed</option>
-          </select>
-          <select 
-            value={filterPriority} 
-            onChange={(e) => setFilterPriority(e.target.value)}
-            className="filter-select"
-            style={{ width: 'auto', minWidth: '160px', margin: 0 }}
-          >
-            <option value="all">All Priority</option>
-            <option value="urgent">Urgent</option>
-            <option value="high">High</option>
-            <option value="normal">Normal</option>
-          </select>
-        </div>
+        <select
+          className="filter-select"
+          value={filterStatus}
+          onChange={e => setFilterStatus(e.target.value)}
+        >
+          <option value="all">All Status</option>
+          <option value="open">Open</option>
+          <option value="pending">Pending</option>
+          <option value="in_progress">In Progress</option>
+          <option value="resolved">Resolved</option>
+          <option value="closed">Closed</option>
+        </select>
+        <select
+          className="filter-select"
+          value={filterPriority}
+          onChange={e => setFilterPriority(e.target.value)}
+        >
+          <option value="all">All Priority</option>
+          <option value="urgent">Urgent</option>
+          <option value="high">High</option>
+          <option value="normal">Normal</option>
+        </select>
       </div>
 
       {/* Table */}
-      <div className="tickets-table-container">
-        <table className="tickets-table">
+      <div className="table-wrap">
+        <table className="data-table">
           <thead>
             <tr>
               <th>Ticket #</th>
@@ -415,32 +119,33 @@ export default function TicketList() {
               <th>Status</th>
               <th>Priority</th>
               <th>Created</th>
-              <th>Actions</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
             {filteredTickets.length === 0 ? (
-              <tr><td colSpan="7" style={{textAlign:'center', padding:'20px'}}>No tickets found</td></tr>
+              <tr>
+                <td colSpan={7} style={{ textAlign: 'center', padding: '48px', color: 'var(--text-muted)' }}>
+                  No tickets found
+                </td>
+              </tr>
             ) : (
               filteredTickets.map(ticket => (
                 <tr key={ticket.id}>
-                  <td className="ticket-number">{ticket.ticket_number}</td>
-                  <td className="ticket-title">{ticket.title}</td>
-                  <td>{ticket.ticket_type}</td>
+                  <td className="col-mono">{ticket.ticket_number}</td>
+                  <td className="col-strong">{ticket.title}</td>
+                  <td className="col-muted">{ticket.ticket_type}</td>
+                  <td><span className={statusBadge(ticket.status)}>{ticket.status}</span></td>
+                  <td><span className={priorityBadge(ticket.priority)}>{ticket.priority}</span></td>
+                  <td className="col-muted">{new Date(ticket.created_at).toLocaleDateString()}</td>
                   <td>
-                    <span className={`status-badge ${ticket.status}`}>{ticket.status}</span>
-                  </td>
-                  <td>
-                    <span className={`priority-badge ${ticket.priority}`}>{ticket.priority}</span>
-                  </td>
-                  <td>{new Date(ticket.created_at).toLocaleDateString()}</td>
-                  <td>
-                    {/* ✅ BUTTON THAT TRIGGERS THE POPUP */}
-                    <button 
-                      className="btn-view"
+                    <button
+                      className="btn-icon-sm"
                       onClick={() => handleViewTicket(ticket)}
+                      title="View details"
+                      style={{ color: 'var(--accent)' }}
                     >
-                      <Eye size={16} /> View
+                      <Eye size={14} />
                     </button>
                   </td>
                 </tr>
@@ -450,62 +155,54 @@ export default function TicketList() {
         </table>
       </div>
 
-      {/* ✅ MODAL POPUP CODE */}
+      {/* Detail modal */}
       {showModal && selectedTicket && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal" style={{ maxWidth: '580px' }} onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h2>{selectedTicket.title}</h2>
               <button className="btn-close" onClick={() => setShowModal(false)}>
-                <X size={24} />
+                <X size={18} />
               </button>
             </div>
-            
-            <div className="modal-body" style={{ padding: '24px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', background: '#f8fafc', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', marginBottom: '24px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontWeight: '600', color: '#64748b', fontSize: '14px' }}>Ticket Number</span>
-                  <span style={{ fontWeight: '600', color: '#0f172a', fontSize: '15px' }}>{selectedTicket.ticket_number}</span>
+            <div className="modal-body">
+              <div className="detail-panel">
+                <div className="detail-row">
+                  <span className="detail-key">Ticket Number</span>
+                  <span className="detail-val col-mono">{selectedTicket.ticket_number}</span>
                 </div>
-                
-                <div style={{ height: '1px', background: '#e2e8f0', width: '100%' }}></div>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontWeight: '600', color: '#64748b', fontSize: '14px' }}>Status</span>
-                  <span className={`status-badge ${selectedTicket.status}`}>{selectedTicket.status}</span>
+                <div className="detail-row">
+                  <span className="detail-key">Status</span>
+                  <span className={statusBadge(selectedTicket.status)}>{selectedTicket.status}</span>
                 </div>
-
-                <div style={{ height: '1px', background: '#e2e8f0', width: '100%' }}></div>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontWeight: '600', color: '#64748b', fontSize: '14px' }}>Priority</span>
-                  <span className={`priority-badge ${selectedTicket.priority}`}>{selectedTicket.priority}</span>
+                <div className="detail-row">
+                  <span className="detail-key">Priority</span>
+                  <span className={priorityBadge(selectedTicket.priority)}>{selectedTicket.priority}</span>
                 </div>
-
-                <div style={{ height: '1px', background: '#e2e8f0', width: '100%' }}></div>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontWeight: '600', color: '#64748b', fontSize: '14px' }}>Created Date & Time</span>
-                  <span style={{ fontWeight: '500', color: '#334155', fontSize: '14px' }}>{new Date(selectedTicket.created_at).toLocaleString()}</span>
+                <div className="detail-row">
+                  <span className="detail-key">Type</span>
+                  <span className="detail-val">{selectedTicket.ticket_type}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="detail-key">Created</span>
+                  <span className="detail-val">{new Date(selectedTicket.created_at).toLocaleString()}</span>
                 </div>
               </div>
 
-              <div className="detail-section" style={{ background: '#ffffff', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-                <h3 style={{ margin: '0 0 12px 0', fontSize: '16px', color: '#0f172a' }}>Description of the Problem</h3>
-                <ul style={{ margin: 0, paddingLeft: '20px', color: '#475569', lineHeight: '1.7', fontSize: '15px' }}>
-                  {selectedTicket.description ? (
-                    selectedTicket.description.replace(/\*\*/g, '').split('\n').filter(line => line.trim() !== '').map((line, index) => (
-                      <li key={index} style={{ marginBottom: '6px' }}>{line}</li>
-                    ))
-                  ) : (
-                    <li>No description provided.</li>
-                  )}
+              <div className="desc-box">
+                <h3>Description</h3>
+                <ul>
+                  {selectedTicket.description
+                    ? selectedTicket.description.replace(/\*\*/g, '').split('\n').filter(l => l.trim()).map((line, i) => (
+                        <li key={i}>{line}</li>
+                      ))
+                    : <li>No description provided.</li>
+                  }
                 </ul>
               </div>
             </div>
-
-            <div className="modal-footer" style={{ borderTop: '1px solid #e2e8f0', padding: '16px 24px', display: 'flex', justifyContent: 'flex-end', background: '#f8fafc', borderBottomLeftRadius: '12px', borderBottomRightRadius: '12px' }}>
-              <button className="btn-secondary" onClick={() => setShowModal(false)} style={{ padding: '8px 16px', borderRadius: '8px', cursor: 'pointer' }}>Close</button>
+            <div className="modal-footer">
+              <button className="btn-secondary" onClick={() => setShowModal(false)}>Close</button>
             </div>
           </div>
         </div>
